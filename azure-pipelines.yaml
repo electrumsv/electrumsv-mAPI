@@ -1,0 +1,125 @@
+trigger:
+  batch: true
+  branches:
+    include:
+    - master
+    - releases/*
+    - features/*
+  paths:
+    exclude: [ 'README.md' ]
+
+jobs:
+- job: BuildLinux
+
+  pool:
+    vmImage: 'ubuntu-latest'
+
+  variables:
+    buildConfiguration: 'Release'
+    BUILD_PATH: '$(Build.BinariesDirectory)/mAPI-linux'
+    CSPROJ_PROJECT_PATH: '$(Build.BinariesDirectory)/mAPI-linux/src/MerchantAPI/APIGateway/APIGateway.Rest/MerchantAPI.APIGateway.Rest.csproj'
+
+  steps :
+    - bash: |
+        set -e
+        git clone --branch v1.2.0 --depth=1 https://github.com/bitcoin-sv/merchantapi-reference.git $(BUILD_PATH)
+      displayName: 'clone'
+
+    - task: UseDotNet@2
+      displayName: 'Use .NET Core sdk'
+      inputs:
+        version: '3.1.x'
+        packageType: sdk
+        installationPath: $(Agent.ToolsDirectory)/dotnet
+
+    - bash: |
+        dotnet restore $(CSPROJ_PROJECT_PATH) --verbosity normal
+      displayName: 'Restore'
+
+    - bash: |
+        dotnet build $(CSPROJ_PROJECT_PATH) --verbosity normal
+      displayName: 'Build'
+
+    - bash: |
+        dotnet publish $(CSPROJ_PROJECT_PATH) -r linux-x64 -c $(buildConfiguration) --self-contained true -p:PublishSingleFile=true -o $(BUILD_PATH)/publish --verbosity normal
+      displayName: 'Publish'
+
+    - task: PublishBuildArtifacts@1
+      displayName: 'publish artifact'
+      inputs:
+        artifactName: 'LinuxMerchantAPI'
+        pathtoPublish: '$(BUILD_PATH)/publish'
+
+- job: BuildMacOSX
+
+  pool:
+    vmImage: 'macOS-10.15'
+
+  variables:
+    buildConfiguration: 'Release'
+    BUILD_PATH: '$(Build.BinariesDirectory)/mAPI-macosx'
+    CSPROJ_PROJECT_PATH: '$(Build.BinariesDirectory)/mAPI-macosx/src/MerchantAPI/APIGateway/APIGateway.Rest/MerchantAPI.APIGateway.Rest.csproj'
+
+  steps :
+    - bash: |
+        set -e
+        git clone --branch v1.2.0 --depth=1 https://github.com/bitcoin-sv/merchantapi-reference.git $(BUILD_PATH)
+      displayName: 'clone'
+
+    - task: UseDotNet@2
+      displayName: 'Use .NET Core sdk'
+      inputs:
+        version: '3.1.x'
+        packageType: sdk
+        installationPath: $(Agent.ToolsDirectory)/dotnet
+
+    - bash: |
+        dotnet restore $(CSPROJ_PROJECT_PATH) --verbosity normal
+      displayName: 'Restore'
+
+    - bash: |
+        dotnet build $(CSPROJ_PROJECT_PATH) --verbosity normal
+      displayName: 'Build'
+
+    - bash: |
+        dotnet publish $(CSPROJ_PROJECT_PATH) -r osx-x64 -c $(buildConfiguration) --self-contained true -p:PublishSingleFile=true -o $(BUILD_PATH)/publish --verbosity normal
+      displayName: 'Publish'
+
+    - task: PublishBuildArtifacts@1
+      displayName: 'publish artifact'
+      inputs:
+        artifactName: 'MacOSXMerchantAPI'
+        pathtoPublish: '$(BUILD_PATH)/publish'
+
+- job: BuildWindows
+
+  pool:
+    vmImage: 'windows-latest'
+
+  variables:
+    buildConfiguration: 'Release'
+    BUILD_PATH: '$(Build.BinariesDirectory)\mAPI-windows'
+    CSPROJ_PROJECT_PATH: '$(Build.BinariesDirectory)\mAPI-windows\src\MerchantAPI\APIGateway\APIGateway.Rest\MerchantAPI.APIGateway.Rest.csproj'
+
+  steps :
+    - script: |
+        set -e
+        git clone --branch v1.2.0 --depth=1 https://github.com/bitcoin-sv/merchantapi-reference.git $(BUILD_PATH)
+      displayName: 'clone'
+
+    - task: UseDotNet@2
+      displayName: 'Use .NET Core sdk'
+      inputs:
+        version: '3.1.x'
+        packageType: sdk
+
+    - script: |
+        dotnet restore $(CSPROJ_PROJECT_PATH)
+        dotnet publish $(CSPROJ_PROJECT_PATH) -r win-x64 -c $(buildConfiguration) -p:PublishSingleFile=true -o $(BUILD_PATH)\publish --self-contained true --verbosity normal --force
+      displayName: 'Publish'
+
+    - task: PublishBuildArtifacts@1
+      displayName: 'publish artifact'
+      inputs:
+        artifactName: 'WindowsMerchantAPI'
+        pathtoPublish: '$(BUILD_PATH)\publish'
