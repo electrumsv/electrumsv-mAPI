@@ -22,7 +22,7 @@ jobs:
   steps :
     - bash: |
         set -e
-        git clone --branch v1.2.0 --depth=1 https://github.com/bitcoin-sv/merchantapi-reference.git $(BUILD_PATH)
+        git clone --branch v1.3.0 --depth=1 https://github.com/bitcoin-sv/merchantapi-reference.git $(BUILD_PATH)
       displayName: 'clone'
 
     - task: UseDotNet@2
@@ -63,7 +63,7 @@ jobs:
   steps :
     - bash: |
         set -e
-        git clone --branch v1.2.0 --depth=1 https://github.com/bitcoin-sv/merchantapi-reference.git $(BUILD_PATH)
+        git clone --branch v1.3.0 --depth=1 https://github.com/bitcoin-sv/merchantapi-reference.git $(BUILD_PATH)
       displayName: 'clone'
 
     - task: UseDotNet@2
@@ -104,7 +104,7 @@ jobs:
   steps :
     - script: |
         set -e
-        git clone --branch v1.2.0 --depth=1 https://github.com/bitcoin-sv/merchantapi-reference.git $(BUILD_PATH)
+        git clone --branch v1.3.0 --depth=1 https://github.com/bitcoin-sv/merchantapi-reference.git $(BUILD_PATH)
       displayName: 'clone'
 
     - task: UseDotNet@2
